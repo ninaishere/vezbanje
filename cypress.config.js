@@ -7,5 +7,9 @@ module.exports = defineConfig({
     },
     baseUrl: "https://cypress.vivifyscrum-stage.com/",
     api: "https://cypress-api.vivifyscrum-stage.com/api/v2",
+    env: {
+      VALID_USER_EMAIL: "ninasamsung2001@gmail.com",
+      VALID_USER_PASSWORD: "test123456",
+    },
   },
 });
