@@ -15,6 +15,14 @@ class Edit {
     return cy.get("[name='vacationDays']");
   }
 
+  get workingMonths() {
+    return cy.get("[name='numOfWorkingMonthsForAdditionalDays']");
+  }
+
+  get additionalVacDays() {
+    return cy.get("[name='additionalVacationDays']");
+  }
+
   get secondUpdateBtn() {
     return cy.get("[type='submit']").eq(1);
   } //for vacation days
@@ -59,18 +67,6 @@ class Edit {
     return cy.get(".vs-c-btn--primary");
   }
 
-  get logoutBtn() {
-    return cy.get(".vs-c-btn--danger");
-  }
-
-  get accountBtn() {
-    return cy.get(".el-dropdown-link");
-  } //with user avatar
-
-  get profileBtn() {
-    return cy.get(".router-link-exact-active");
-  }
-
   editName(newName) {
     this.nameInput.clear();
     this.nameInput.type(newName);
@@ -81,8 +77,10 @@ class Edit {
     this.workdays.eq(number).click();
   }
 
-  vacationDays(number) {
-    this.vacDays.clear().type(number);
+  vacationDays(num1, num2, num3) {
+    this.vacDays.clear().type(num1);
+    this.workingMonths.clear().type(num2);
+    this.additionalVacDays.clear().type(num3);
     this.secondUpdateBtn.click();
   }
 
@@ -129,10 +127,6 @@ class Edit {
   archive() {
     this.archiveBtn.click();
     this.yesBtn.click();
-  }
-
-  logout() {
-    this.logoutBtn.click();
   }
 }
 

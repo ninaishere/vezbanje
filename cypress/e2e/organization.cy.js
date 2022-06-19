@@ -3,12 +3,14 @@
 import { login } from "../page_objects/login";
 import { createOrganization } from "../page_objects/createOrganization";
 import { edit } from "../page_objects/edit";
+import { profile } from "../page_objects/profile";
 const faker = require("faker");
 
 describe("Login test", () => {
   let loginData = {
     email: "ninasamsung2001@gmail.com",
     password: "test123456",
+    newPassword: "test654321",
   };
   let organizationData = {
     name: faker.name.firstName(),
@@ -23,7 +25,7 @@ describe("Login test", () => {
     cy.url().should("include", "/login");
   });
 
-  it.only("valid login", () => {
+  it("valid login", () => {
     cy.intercept({
       method: "POST",
       url: "https://cypress-api.vivifyscrum-stage.com/api/v2/login",
@@ -102,7 +104,7 @@ describe("Login test", () => {
       url: `https://cypress-api.vivifyscrum-stage.com/api/v2/organizations/${orgId}/vacation-days`,
     }).as("vacDays");
 
-    edit.vacationDays(24);
+    edit.vacationDays(24, 16, 7);
 
     cy.wait("@vacDays").then((interception) => {
       expect(interception.response.statusCode).eq(200);
@@ -291,7 +293,7 @@ describe("Login test", () => {
     });
   });
 
-  it.only("logout", () => {
+  it("logout", () => {
     cy.intercept({
       method: "POST",
       url: "https://cypress-api.vivifyscrum-stage.com/api/v2/logout",
@@ -299,12 +301,113 @@ describe("Login test", () => {
 
     login.login(loginData.email, loginData.password);
     cy.wait(3000);
-    cy.visit("https://cypress.vivifyscrum-stage.com/account/settings");
+    // cy.visit("https://cypress.vivifyscrum-stage.com/account/settings");
 
-    edit.logout();
+    profile.logout();
 
     cy.wait("@logout").then((interception) => {
       expect(interception.response.statusCode).eq(201);
     });
   });
+
+  it("change first and last name", () => {
+    cy.intercept({
+      method: "PUT",
+      url: `https://cypress-api.vivifyscrum-stage.com/api/v2/users`,
+    }).as("changeName");
+
+    login.login(loginData.email, loginData.password);
+    cy.wait(3000);
+
+    profile.personalInfo("nina", "r");
+
+    cy.wait("@changeName").then((interception) => {
+      expect(interception.response.statusCode).eq(200);
+    });
+  });
+
+  it("change email", () => {
+    cy.intercept({
+      method: "PUT",
+      url: `https://cypress-api.vivifyscrum-stage.com/api/v2/users`,
+    }).as("changeEmail");
+
+    login.login(loginData.email, loginData.password);
+    cy.wait(3000);
+
+    profile.changeEmail(loginData.email, loginData.password);
+
+    cy.wait("@changeEmail").then((interception) => {
+      expect(interception.response.statusCode).eq(400);
+    });
+  });
+
+  it("change password", () => {
+    cy.intercept({
+      method: "POST",
+      url: `https://cypress-api.vivifyscrum-stage.com/api/v2/update-password`,
+    }).as("changePassword");
+
+    login.login(loginData.email, loginData.password);
+    cy.wait(3000);
+
+    profile.changePassword(loginData.password, loginData.newPassword);
+
+    cy.wait("@changePassword").then((interception) => {
+      expect(interception.response.statusCode).eq(200);
+    });
+  });
+
+  it("bring back old password", () => {
+    cy.intercept({
+      method: "POST",
+      url: `https://cypress-api.vivifyscrum-stage.com/api/v2/update-password`,
+    }).as("changePassword");
+
+    login.login(loginData.email, loginData.newPassword);
+    cy.wait(3000);
+
+    profile.bringBackOldPassword(loginData.newPassword, loginData.password);
+
+    cy.wait("@changePassword").then((interception) => {
+      expect(interception.response.statusCode).eq(200);
+    });
+  });
+
+  it("calendar start day", () => {
+    cy.intercept({
+      method: "PUT",
+      url: `https://cypress-api.vivifyscrum-stage.com/api/v2/organizations/${orgId}/calendar-starting-day`,
+    }).as("startDay");
+
+    login.login(loginData.email, loginData.password);
+    cy.wait(3000);
+    cy.visit(
+      `https://cypress.vivifyscrum-stage.com/organizations/${orgId}/settings`
+    );
+
+    profile.changeCalendarStartDay();
+
+    cy.wait("@startDay").then((interception) => {
+      expect(interception.response.statusCode).eq(200);
+    });
+  });
+
+  it.only("change theme", () => {
+    cy.intercept({
+      method: "PUT",
+      url: `https://cypress-api.vivifyscrum-stage.com/api/v2/user-theme`,
+    }).as("theme");
+
+    login.login(loginData.email, loginData.password);
+    cy.wait(3000);
+
+    profile.changeTheme();
+
+    cy.wait("@theme").then((interception) => {
+      expect(interception.response.statusCode).eq(200);
+    });
+  });
+
+  it("delete every org", () => {});
 });
