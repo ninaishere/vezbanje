@@ -75,7 +75,7 @@ class Profile {
     return cy.get(".vs-c-icon--lg").eq(2);
   }
 
-  get logout() {
+  logout() {
     this.accountBtn.click();
     this.profileBtn.click();
     this.logoutBtn.click();
